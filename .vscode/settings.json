@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "*.html": "html",
+        "sleeplock.h": "c",
+        "types.h": "c",
+        "stat.h": "c",
+        "user.h": "c",
+        "cmath": "c",
+        "compare": "c",
+        "concepts": "c",
+        "type_traits": "c",
+        "limits": "c",
+        "new": "c",
+        "typeinfo": "c"
+    }
+}

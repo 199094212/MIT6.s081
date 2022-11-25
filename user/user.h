@@ -1,5 +1,11 @@
 struct stat;
-
+#define STDIN  0
+#define STDOUT 1
+#define STDERR 2
+#define true 1
+#define false 0
+typedef char bool;
+#define EOF (-1)
 // system calls
 int fork(void);
 int exit(int) __attribute__((noreturn));
