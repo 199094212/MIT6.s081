@@ -307,24 +307,29 @@ fork(void)
     if(p->ofile[i])
       np->ofile[i] = filedup(p->ofile[i]);
   np->cwd = idup(p->cwd);
+  
+  np->trace = p->trace;
 
   safestrcpy(np->name, p->name, sizeof(p->name));
-
   pid = np->pid;
-
   release(&np->lock);
 
   acquire(&wait_lock);
   np->parent = p;
   release(&wait_lock);
-
   acquire(&np->lock);
   np->state = RUNNABLE;
   release(&np->lock);
-
   return pid;
 }
 
+// add trace mask
+int 
+trace(int n){
+     struct proc *p = myproc();
+     p->trace = n;
+     return 0;
+}
 // Pass p's abandoned children to init.
 // Caller must hold wait_lock.
 void
@@ -680,4 +685,16 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+uint64
+num_proc(void){
+  int i;
+  uint64 ret = 0;
+  for(i = 0;i<NPROC;i++){
+    if(proc[i].state !=UNUSED){
+      ret++;
+    }
+  }
+  return ret;
 }

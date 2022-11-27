@@ -1,0 +1,3 @@
+usertrap
+7 代表SYS_exec
+0x22
