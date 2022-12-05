@@ -75,7 +75,16 @@ int
 sys_pgaccess(void)
 {
   // lab pgtbl: your code here.
-  return 0;
+  uint64 addr;
+  uint64 bit;
+  int size;
+  argaddr(0,&addr);
+  if (addr < 0 )return -1;
+  argint(1,&size);
+  if (size < 0) return -1;
+  argaddr(2,&bit);   // copyout
+  if (bit < 0) return -1;
+  return pgaccess(addr,size,bit);
 }
 #endif
 

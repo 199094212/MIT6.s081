@@ -131,7 +131,13 @@ found:
     release(&p->lock);
     return 0;
   }
-
+  #ifdef LAB_PGTBL
+  if((p->u = (struct usyscall *)kalloc())==0){
+    freeproc(p);
+    release(&p->lock);
+    return 0;
+  }
+  #endif
   // An empty user page table.
   p->pagetable = proc_pagetable(p);
   if(p->pagetable == 0){
@@ -139,7 +145,9 @@ found:
     release(&p->lock);
     return 0;
   }
-
+  #ifdef LAB_PGTBL
+  p->u->pid = p->pid;
+  #endif
   // Set up new context to start executing at forkret,
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
@@ -155,6 +163,11 @@ found:
 static void
 freeproc(struct proc *p)
 {
+  #ifdef LAB_PGTBL
+  if(p->u)
+    kfree((void*)p->u);
+  p->u = 0;
+  #endif
   if(p->trapframe)
     kfree((void*)p->trapframe);
   p->trapframe = 0;
@@ -201,7 +214,15 @@ proc_pagetable(struct proc *p)
     uvmfree(pagetable, 0);
     return 0;
   }
-
+  
+  #ifdef LAB_PGTBL
+  
+  if(mappages(pagetable,USYSCALL,PGSIZE,(uint64)p->u,PTE_R|PTE_U)< 0){
+    uvmunmap(pagetable, TRAPFRAME, 1, 0);
+    uvmunmap(pagetable, TRAMPOLINE, 1, 0);
+    uvmfree(pagetable, 0);
+  }
+  #endif
   return pagetable;
 }
 
@@ -212,6 +233,9 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
 {
   uvmunmap(pagetable, TRAMPOLINE, 1, 0);
   uvmunmap(pagetable, TRAPFRAME, 1, 0);
+  #ifdef LAB_PGTBL
+  uvmunmap(pagetable, USYSCALL,1,0);
+  #endif
   uvmfree(pagetable, sz);
 }
 
@@ -680,4 +704,21 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int
+pgaccess(uint64 addr,int size,uint bit){
+  struct proc *p = myproc();
+  uint32 k_bit;
+  for(int i = 0;i<size;i++){
+    pte_t *pte;
+    // 访问地址 xxx 
+    pte = walk(p->pagetable, ((uint64)addr) + (uint64)PGSIZE * i, 0);
+    if(pte > 0 && *pte&PTE_A) {
+      k_bit |=  1<<i;
+      *pte ^= PTE_A;
+    }
+  }
+  copyout(p->pagetable,bit,(char*)&k_bit,sizeof(k_bit));
+  return 0;
 }
