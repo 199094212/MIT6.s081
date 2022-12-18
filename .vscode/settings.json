@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.html": "html",
+        "riscv.h": "c",
+        "defs.h": "c",
+        "user.h": "c",
+        "stdarg.h": "c",
+        "types.h": "c",
+        "proc.h": "c",
+        "limits": "c",
+        "spinlock.h": "c"
+    }
+}

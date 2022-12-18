@@ -5,7 +5,6 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
-
 uint64
 sys_exit(void)
 {
@@ -51,9 +50,9 @@ sys_sbrk(void)
 uint64
 sys_sleep(void)
 {
+  backtrace();
   int n;
   uint ticks0;
-
   argint(0, &n);
   if(n < 0)
     n = 0;
@@ -90,4 +89,20 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64
+sys_sigalarm(void)
+{
+  int n;
+  uint64 func;
+  argint(0,&n);
+  argaddr(1,&func);
+  return (uint64)sigalarm(n,(alarmhandler_t)(func));
+}
+uint64
+sys_sigreturn(void)
+{
+  sigreturn();
+  return 0;
 }

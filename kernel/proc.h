@@ -80,6 +80,15 @@ struct trapframe {
 };
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+struct sigalarm_task
+{
+  void (*sighandler)(void); 
+  int last_tick;
+  int interval_tick;
+  struct trapframe trapframe;
+  int running;
+};
+
 
 // Per-process state
 struct proc {
@@ -94,7 +103,7 @@ struct proc {
 
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
-
+  struct sigalarm_task* sigalarm; 
   // these are private to the process, so p->lock need not be held.
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
